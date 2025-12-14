@@ -4,8 +4,7 @@ import (
 	"octohook/internal/model"
 )
 
-
-func RunHook(hook model.Hook) (bool,string){
+func RunHook(hook model.Hook) (bool, string) {
 	if !hook.Enabled {
 		return true, "skipped"
 	}
@@ -15,5 +14,6 @@ func RunHook(hook model.Hook) (bool,string){
 		if !passed {
 			return false, output
 		}
+	}
 	return true, "success"
 }
