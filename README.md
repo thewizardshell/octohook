@@ -1,8 +1,8 @@
-<h1 align="center"> OctoHook </h1>
+<h1 align="center"> Octohook </h1>
 <div align="center">
-  <img src="https://github.com/user-attachments/assets/af13d57f-e480-4bb7-9928-a75361ba33ba" alt="OctoHook Logo" width="400" />
-
-  <p><strong>🐙 Git hooks made fast and simple</strong></p>
+  <img src="https://github.com/user-attachments/assets/3d589a9e-ed13-401c-8ab9-663bf43b8499" alt="OctoHook Logo" width="600" />
+  
+  <p><strong>Git hooks made fast and simple</strong></p>
   <p>Zero dependencies. Intelligent caching. Any project.</p>
 
   [![Release](https://img.shields.io/github/v/release/thewizardshell/octohook?label=Release&color=8b5cf6)](https://github.com/thewizardshell/octohook/releases)
