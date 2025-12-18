@@ -9,11 +9,13 @@ type Path struct {
 
 // Hook represents a git hook configuration.
 // Cache defaults to true if omitted in yml.
+// UseDirectory tells the runner to pass the directory instead of the file (needed for Go tests).
 type Hook struct {
-	Command string   `yaml:"command"`
-	Arg     []string `yaml:"arg,omitempty"`
-	Path    Path     `yaml:"path,omitempty"`
-	Cache   bool     `yaml:"cache,omitempty"`
+	Command      string   `yaml:"command"`
+	Arg          []string `yaml:"arg,omitempty"`
+	Path         Path     `yaml:"path,omitempty"`
+	Cache        bool     `yaml:"cache,omitempty"`
+	UseDirectory bool     `yaml:"use_directory,omitempty"`
 }
 
 // Config represents the complete octohook.yml structure.

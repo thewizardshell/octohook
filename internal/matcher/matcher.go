@@ -1,11 +1,13 @@
 package matcher
 
 import (
+	"fmt"
 	"octohook/internal/config"
 	"strings"
 
 	"github.com/bmatcuk/doublestar/v4"
 )
+
 // getSuffix extracts the file suffix from a glob pattern.
 // It finds the last "*" and returns everything after it.
 //
@@ -13,8 +15,8 @@ import (
 //   - "**/*.go" → ".go"
 //   - "**/*_test.go" → "_test.go"
 //   - "**/*.test.ts" → ".test.ts"
-func getsuffix(pattern string) string {
-	idx := strings.lastindex(pattern, "*")
+func getSuffix(pattern string) string {
+	idx := strings.LastIndex(pattern, "*")
 	if idx == -1 {
 		return ""
 	}
@@ -38,26 +40,28 @@ func getsuffix(pattern string) string {
 //  2. Extracting suffix from service pattern (.ts)
 //  3. Extracting suffix from test pattern (.test.ts)
 //  4. Replacing service suffix with test suffix (auth.ts → auth.test.ts)
-
-func match(files []string, path config.path) ([]string, error) {
+func Match(files []string, path config.Path) ([]string, error) {
 	var tests []string
 
 	for _, file := range files {
-		for _, pattern := range path.services {
-			match, err := doublestar.pathmatch(pattern, file)
+		matched := false
+		for _, pattern := range path.Services {
+			match, err := doublestar.PathMatch(pattern, file)
 			if err != nil {
 				return nil, err
 			}
 			if match {
-				servicesuffix := getsuffix(pattern)
-				testsuffix := getsuffix(path.test[0])
+				matched = true
+				serviceSuffix := getSuffix(pattern)
+				testSuffix := getSuffix(path.Test[0])
 
-				testfile := strings.trimsuffix(file, servicesuffix) + testsuffix
-				tests = append(tests, testfile)
+				testFile := strings.TrimSuffix(file, serviceSuffix) + testSuffix
+				tests = append(tests, testFile)
 				break
 			}
-			if !match {
-				warnings = append(warnings, "no match found for file: "+file+" with pattern: "+pattern)
+		}
+		if !matched {
+			fmt.Printf("Warning: no match found for file: %s\n", file)
 		}
 	}
 	return tests, nil
