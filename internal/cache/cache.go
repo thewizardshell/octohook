@@ -49,3 +49,12 @@ func Load(service string) (*CacheEntry, error) {
 	err = json.Unmarshal(data, &entry)
 	return &entry, err
 }
+
+func Delete() error {
+	cachePath := filepath.Join(".octohook", "cache")
+	err := os.RemoveAll(cachePath)
+	if err != nil {
+		return err
+	}
+	return nil
+}

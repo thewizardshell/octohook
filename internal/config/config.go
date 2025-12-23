@@ -18,11 +18,17 @@ type Hook struct {
 	UseDirectory bool     `yaml:"use_directory,omitempty"`
 }
 
+type InvalidateCacheOn struct {
+	Path   []string `yaml:"path,omitempty"`
+	Always bool     `yaml:"always,omitempty"`
+}
+
 // Config represents the complete octohook.yml structure.
 // Each hook type is optional - only configure what you need.
 type Config struct {
-	PreCommit  *Hook `yaml:"pre-commit,omitempty"`
-	PostCommit *Hook `yaml:"post-commit,omitempty"`
-	PrePush    *Hook `yaml:"pre-push,omitempty"`
-	PostPush   *Hook `yaml:"post-push,omitempty"`
+	InvalidateCacheOn *InvalidateCacheOn `yaml:"invalidate_cache_on,omitempty"`
+	PreCommit         *Hook              `yaml:"pre-commit,omitempty"`
+	PostCommit        *Hook              `yaml:"post-commit,omitempty"`
+	PrePush           *Hook              `yaml:"pre-push,omitempty"`
+	PostPush          *Hook              `yaml:"post-push,omitempty"`
 }

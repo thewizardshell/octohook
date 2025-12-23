@@ -1,6 +1,7 @@
 package hooks
 
 import (
+	"fmt"
 	"octohook/internal/cache"
 	"octohook/internal/config"
 	"octohook/internal/git"
@@ -35,7 +36,7 @@ func getSuffix(pattern string) string {
 //
 // The updates channel is always closed when execution finishes.
 
-func RunHook(hook *config.Hook, updates chan<- model.TestUpdate) {
+func RunHook(hook *config.Hook, invalidate *config.InvalidateCacheOn, updates chan<- model.TestUpdate) {
 	if hook == nil {
 		close(updates)
 		return
@@ -52,6 +53,34 @@ func RunHook(hook *config.Hook, updates chan<- model.TestUpdate) {
 		return
 	}
 
+	if invalidate != nil {
+		shouldInvalidate := invalidate.Always
+
+		if !shouldInvalidate && len(invalidate.Path) > 0 {
+			statusFiles, err := git.GetStatus()
+			if err == nil {
+				for _, file := range statusFiles {
+					for _, pattern := range invalidate.Path {
+						match, err := doublestar.PathMatch(pattern, file)
+						if err == nil && match {
+							shouldInvalidate = true
+							break
+						}
+					}
+					if shouldInvalidate {
+						break
+					}
+				}
+			}
+		}
+
+		if shouldInvalidate {
+			err := cache.Delete()
+			if err != nil {
+				fmt.Println("Ocurred error delete cache")
+			}
+		}
+	}
 	graph := BuildGraph(".")
 	if graph == nil {
 		close(updates)
@@ -167,8 +196,8 @@ func RunHook(hook *config.Hook, updates chan<- model.TestUpdate) {
 //   - A Bubble Tea command that waits for hook execution to finish
 //
 // This function is the entry point used by the TUI layer
-func StartHook(hook *config.Hook) (chan model.TestUpdate, tea.Cmd) {
+func StartHook(hook *config.Hook, invalidate *config.InvalidateCacheOn) (chan model.TestUpdate, tea.Cmd) {
 	updates := make(chan model.TestUpdate)
-	go RunHook(hook, updates)
+	go RunHook(hook, invalidate, updates)
 	return updates, model.WaitForUpdate(updates)
 }

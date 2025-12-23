@@ -7,6 +7,7 @@ import (
 	"octohook/internal/model"
 	"octohook/internal/render"
 	"os"
+	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -69,7 +70,6 @@ func main() {
 		}
 	}
 
-	// Handle hook execution
 	var hook *config.Hook
 	switch command {
 	case "pre-commit":
@@ -90,7 +90,7 @@ func main() {
 		os.Exit(0)
 	}
 
-	updates, cmd := hooks.StartHook(hook)
+	updates, cmd := hooks.StartHook(hook, cfg.InvalidateCacheOn)
 	m := model.NewHookModel(command, cmd)
 	m.Updates = updates
 	app := &render.App{Model: m}
@@ -105,11 +105,24 @@ func main() {
 	finalApp := finalModel.(*render.App)
 	if finalApp.Model.Failed {
 		fmt.Fprintln(os.Stderr)
-		fmt.Fprintln(os.Stderr, "Output:")
+
+		divider := "────────────────────────────────────────────"
+		fmt.Fprintln(os.Stderr, "\033[38;5;241m"+divider+"\033[0m")
+		fmt.Fprintln(os.Stderr, "\033[1;38;5;196m✗ Resume\033[0m")
+		fmt.Fprintln(os.Stderr, "\033[38;5;241m"+divider+"\033[0m")
+		fmt.Fprintln(os.Stderr)
+
 		if len(finalApp.Model.Tests) > 0 {
 			for _, test := range finalApp.Model.Tests {
 				if test.Status == model.StatusFail {
-					fmt.Fprintln(os.Stderr, test.Output)
+					fmt.Fprintf(os.Stderr, "\033[1;38;5;196m✗ %s\033[0m\n", test.Name)
+					fmt.Fprintln(os.Stderr, "\033[38;5;241m  └─\033[0m")
+
+					lines := strings.Split(strings.TrimSpace(test.Output), "\n")
+					for _, line := range lines {
+						fmt.Fprintf(os.Stderr, "     %s\n", line)
+					}
+					fmt.Fprintln(os.Stderr)
 				}
 			}
 		}
