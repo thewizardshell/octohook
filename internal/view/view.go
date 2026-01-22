@@ -66,6 +66,53 @@ func Render(m *model.Model) string {
 	return "\n" + styles.Box.Render(content) + "\n"
 }
 
+func RenderResume(m *model.Model) string {
+	var sections []string
+
+	// Header del Resume
+	divider := dividerStyle.Render(strings.Repeat("─", 44))
+	sections = append(sections, divider)
+	title := styles.Fail.Render("✗ Resume")
+	sections = append(sections, title)
+	sections = append(sections, divider)
+	sections = append(sections, "")
+
+	if len(m.Tests) > 0 {
+		// Primero mostrar los que pasaron
+		for _, test := range m.Tests {
+			if test.Status == model.StatusOk {
+				icon := styles.Ok.Render("✓")
+				name := hookNameStyle.Render(test.Name)
+				sections = append(sections, fmt.Sprintf("%s %s", icon, name))
+			}
+		}
+
+		// Luego mostrar los que fallaron con detalles
+		for _, test := range m.Tests {
+			if test.Status == model.StatusFail {
+				icon := styles.Fail.Render("✗")
+				name := hookNameStyle.Render(test.Name)
+				sections = append(sections, fmt.Sprintf("%s %s", icon, name))
+
+				prefix := dividerStyle.Render("  └─")
+				sections = append(sections, prefix)
+
+				lines := strings.Split(strings.TrimSpace(test.Output), "\n")
+				for _, line := range lines {
+					sections = append(sections, fmt.Sprintf("     %s", line))
+				}
+				sections = append(sections, "")
+			}
+		}
+	}
+
+	content := lipgloss.JoinVertical(lipgloss.Left, sections...)
+
+	hint := styles.Muted.Render("Press q, enter or ctrl+c to exit")
+
+	return "\n" + content + "\n\n" + hint + "\n"
+}
+
 func renderHook(m *model.Model, test model.TestState, isLast bool) string {
 	var icon string
 	var statusStyle lipgloss.Style
